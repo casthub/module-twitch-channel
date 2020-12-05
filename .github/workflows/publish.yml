@@ -1,0 +1,54 @@
+name: Publish
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    outputs:
+      tagname: ${{ steps.update_tag.outputs.tagname }}
+    steps:
+      - name: Install Node
+        uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+      - name: Clone Repo
+        uses: actions/checkout@v2
+      - name: Create new Tag
+        uses: Klemensas/action-autotag@stable
+        id: update_tag
+        with:
+          tag_prefix: 'v'
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create GitHub Release
+        if: steps.update_tag.outputs.tagname
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.update_tag.outputs.tagname }}
+          release_name: ${{ steps.update_tag.outputs.tagname }}
+          draft: false
+          prerelease: false
+  publish:
+    name: Publish
+    runs-on: ubuntu-latest
+    needs: release
+    if: needs.release.outputs.tagname
+    steps:
+      - name: Install Node
+        uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+      - name: Clone Repo
+        uses: actions/checkout@v2
+      - name: Set-up CastHub CLI
+        uses: casthub/cli-github-action@master
+        with:
+          token: ${{ secrets.CASTHUB_CLI_TOKEN }}
+      - name: Publish to CastHub
+        run: casthub module:upload -p

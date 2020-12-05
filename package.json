@@ -1,0 +1,15 @@
+{
+    "name": "twitch-channel",
+    "version": "1.0.0",
+    "main": "index.js",
+    "license": "Apache-2.0",
+    "casthub": {
+        "width": 7,
+        "height": 7,
+        "min_width": 6,
+        "min_height": 7,
+        "max_width": 10,
+        "max_height": 9,
+        "actions": "light"
+    }
+}
